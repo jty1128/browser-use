@@ -1,4 +1,3 @@
-#!/usr/bin/env -S uv run --script
 # /// script
 # requires-python = ">=3.11"
 # dependencies = ["python-chess", "browser-use", "beautifulsoup4"]
@@ -64,7 +63,7 @@ def parse_transform(style: str) -> tuple[float, float] | None:
 		return x_px_str, y_px_str
 	except Exception as e:
 		logger.error(f'Error parsing transform style: {e}')
-		return None, None
+		return None
 
 
 def algebraic_to_pixels(square: str, square_size: float) -> tuple[str, str]:
