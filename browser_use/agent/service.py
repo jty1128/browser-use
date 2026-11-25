@@ -1325,7 +1325,7 @@ class Agent(Generic[Context]):
 			loop=loop,
 			pause_callback=self.pause,
 			resume_callback=self.resume,
-			custom_exit_callback=on_force_exit_log_telemetry,  # Pass the new telemetrycallback
+			custom_exit_callback=on_force_exit_log_telemetry,  # Pass the new telemetry callback
 			exit_on_second_int=True,
 		)
 		signal_handler.register()
@@ -1533,7 +1533,7 @@ class Agent(Generic[Context]):
 			f'Task to validate: {self.task}. Return a JSON object with 2 keys: is_valid and reason. '
 			f'is_valid is a boolean that indicates if the output is correct. '
 			f'reason is a string that explains why it is valid or not.'
-			f' example: {{"is_valid": false, "reason": "The user wanted to search for "cat photos", but the agent searched for "dog photos" instead."}}'
+			f' example: {{"is_valid": false, "reason": "The user wanted to search for "cat photos", but the agent searched for "dog photos" instead."}}.'
 		)
 
 		if self.browser_context:
@@ -1871,16 +1871,16 @@ class Agent(Generic[Context]):
 	def extract_playwright_actions(self, output_path: str | Path = None, include_initial_actions: bool = True) -> list[dict]:
 		"""
 		Extract Playwright actions from the agent's history and save as JSON for developer testing.
-		
+
 		Args:
 			output_path: Optional path to save the extracted actions as JSON
 			include_initial_actions: Whether to include initial actions in the extracted list
-			
+
 		Returns:
 			List of action dictionaries with action_name, params, and result
 		"""
 		playwright_actions = []
-		
+
 		# First, check if there are any initial actions and we should include them
 		if include_initial_actions and hasattr(self, 'initial_actions') and self.initial_actions:
 			logger.debug(f'Including {len(self.initial_actions)} initial actions in Playwright script')
@@ -1888,12 +1888,14 @@ class Agent(Generic[Context]):
 				action_data = action.model_dump(exclude_unset=True)
 				action_name = next(iter(action_data.keys()), 'unknown')
 				params = action_data.get(action_name, {})
-				playwright_actions.append({
-					'action_name': action_name,
-					'params': params,
-					'result': None  # Initial actions don't have results in the same format
-				})
-		
+				playwright_actions.append(
+					{
+						'action_name': action_name,
+						'params': params,
+						'result': None,  # Initial actions don't have results in the same format
+					}
+				)
+
 		# Then extract actions from history
 		for history_item in self.state.history.history:
 			if not history_item.model_output:
@@ -1907,11 +1909,7 @@ class Agent(Generic[Context]):
 				result = None
 				if i < len(results):
 					result = results[i].model_dump()
-				playwright_actions.append({
-					'action_name': action_name,
-					'params': params,
-					'result': result
-				})
+				playwright_actions.append({'action_name': action_name, 'params': params, 'result': result})
 
 		# Save to file if output_path is provided and logging level is debug
 		if output_path and os.environ.get('BROWSER_USE_LOGGING_LEVEL', '').lower() == 'debug':
