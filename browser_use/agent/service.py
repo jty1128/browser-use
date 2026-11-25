@@ -1888,12 +1888,14 @@ class Agent(Generic[Context]):
 				action_data = action.model_dump(exclude_unset=True)
 				action_name = next(iter(action_data.keys()), 'unknown')
 				params = action_data.get(action_name, {})
-				playwright_actions.append({
-					'action_name': action_name,
-					'params': params,
-					'result': None  # Initial actions don't have results in the same format
-				})
-		
+				playwright_actions.append(
+					{
+						'action_name': action_name,
+						'params': params,
+						'result': None,  # Initial actions don't have results in the same format
+					}
+				)
+
 		# Then extract actions from history
 		for history_item in self.state.history.history:
 			if not history_item.model_output:
@@ -1907,11 +1909,7 @@ class Agent(Generic[Context]):
 				result = None
 				if i < len(results):
 					result = results[i].model_dump()
-				playwright_actions.append({
-					'action_name': action_name,
-					'params': params,
-					'result': result
-				})
+				playwright_actions.append({'action_name': action_name, 'params': params, 'result': result})
 
 		# Save to file if output_path is provided and logging level is debug
 		if output_path and os.environ.get('BROWSER_USE_LOGGING_LEVEL', '').lower() == 'debug':
